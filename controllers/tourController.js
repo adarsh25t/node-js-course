@@ -22,14 +22,47 @@ exports.createTour = async (req,res,next) => {
 }
 
 exports.getAllTours = async (req,res,next) => {
-
+    /*
+        
+    */
     try {
 
-        const allTours = await Tour.find()
+        // ? BUID QUERY
+        const queryObj = {...req.query};
+        const excludedFields = ['page','sort','limit','fields'];
+        excludedFields.forEach(el=> delete queryObj[el]);
+        
+        // ? ADVANCED FILTERING
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+        let query = Tour.find(JSON.parse(queryStr));
+
+        // ? SORTING
+        if (req.query.sort) {
+
+            // ? multiple items sort ( remove , and add empty space )
+            let sortBy = req.query.sort.split(",").join(" ");
+            query = query.sort(sortBy)
+        }
+
+        // ? FIELDS ( SPECIFIC FIELDS )
+        if (req.query.fields) {
+
+            // ? multiple items  ( remove , and add empty space )
+            let fields = req.query.fields.split(",").join(" ");
+            query = query.select(fields)
+        }
+        
+        // ? EXECUTE QUERY
+        const tours = await query;
+        
+
+        // ? SEND RESPONSE
         res.status(200).json({
             status: "Success",
+            results: tours.length,
             data:{
-                tours: allTours
+                tours
             }
         })
         
