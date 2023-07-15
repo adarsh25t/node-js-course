@@ -1,4 +1,5 @@
-const Tour = require("../models/tourModel")
+const Tour = require("../models/tourModel");
+const { apiFeatures } = require("../utils/apiFeatures");
 
 
 exports.createTour = async (req,res,next) => {
@@ -21,53 +22,16 @@ exports.createTour = async (req,res,next) => {
     }
 }
 
+
+
 exports.getAllTours = async (req,res,next) => {
     
     try {
 
-        // * BUID QUERY
-        const queryObj = {...req.query};
-        const excludedFields = ['page','sort','limit','fields'];
-        excludedFields.forEach(el=> delete queryObj[el]);
-        
-        // * ADVANCED FILTERING
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-        let query = Tour.find(JSON.parse(queryStr));
-
-        // * SORTING
-        if (req.query.sort) {
-
-            // * multiple items sort ( remove , and add empty space )
-            let sortBy = req.query.sort.split(",").join(" ");
-            query = query.sort(sortBy)
-        }
-
-        // * FIELDS ( SPECIFIC FIELDS )
-        if (req.query.fields) {
-
-            // * multiple items  ( remove , and add empty space )
-            let fields = req.query.fields.split(",").join(" ");
-            query = query.select(fields)
-        }
-
-
-        // * PAGINATION 
-        if(req.query.page) {
-            const page = req.query.page * 1 || 1;
-            const limit = req.query.limit * 1 || 1;
-            const skip = (page - 1) * limit;
-            // page=2&limt=10 21-10 ( 2* 10 - 10 )
-            query = query.skip(skip).limit(limit);
-
-            const numTours = await Tour.countDocuments();
-            if (skip >= numTours) throw new Error("This page is does not exist!")
-        }
-        
         // * EXECUTE QUERY
-        const tours = await query;
-        
-
+        const fearure = new apiFeatures(Tour.find(),req.query).sort().filter().fields().pagination();
+        const tours = await fearure.query;
+      
         // * SEND RESPONSE
         res.status(200).json({
             status: "Success",
