@@ -113,4 +113,79 @@ exports.deleteTour = async (req,res,next) => {
             message: error
         })
     }
+<<<<<<< HEAD
+=======
+}
+
+exports.getTourStarts = async (req,res) => {
+
+    try {
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage: { $gte: 4 }}
+            },
+            {
+                $group: {
+                    _id: '$difficulty',
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' }
+                }
+            },
+            {
+                $sort: { avgPrice: 1}
+            }
+        ])
+
+        res.status(200).json({
+            status: "Success",
+            stats
+        })
+        
+    } catch (error) {
+        res.status(404).json({
+            status: "fail",
+            message: error
+        })
+    }
+}
+
+exports.getMonthlyPlan = async (req,res) => {
+
+    try {
+        let year = req.params.year * 1
+        
+        let plan = await Tour.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: "$startDates"},
+                    numToursStats: { $sum : 1}
+                }
+            }
+        ])
+
+        res.status(200).json({
+            status: "Success",
+            plan
+        })
+
+    }catch(error) {
+        res.status(404).json({
+            status: "fail",
+            message: error
+        })
+    }
+>>>>>>> f990c42 (aggregate)
 }
