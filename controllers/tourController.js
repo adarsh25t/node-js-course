@@ -113,8 +113,6 @@ exports.deleteTour = async (req,res,next) => {
             message: error
         })
     }
-<<<<<<< HEAD
-=======
 }
 
 exports.getTourStarts = async (req,res) => {
@@ -187,5 +185,4 @@ exports.getMonthlyPlan = async (req,res) => {
             message: error
         })
     }
->>>>>>> f990c42 (aggregate)
 }
