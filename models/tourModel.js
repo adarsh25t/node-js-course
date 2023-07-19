@@ -28,7 +28,13 @@ const tourSchema = new mongoose.Schema({
     },
     price:{
         type: Number,
-        required: [true, "A tour must have a price"]
+        required: [true, "A tour must have a price"],
+        validate:{
+            validator: function(val){
+                return val >= 1000
+            },
+            message:"price grater than 1000"
+        }
     },
     priceDiscount: Number,
     summery:{
@@ -48,7 +54,42 @@ const tourSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
-    startDates:[Date]
+    startDates:[Date],
+    secretTour:{
+        type: Boolean,
+        default: false
+    }
+},{
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+})
+
+tourSchema.virtual('durationWeeks').get(function() {
+    return this.duration / 7;
+})
+
+// DOCUMENT MIDDLEWARE: RUNS BEFORE .save() and .create()
+// tourSchema.pre('save',function(next) {
+//     console.log("will save the document...");
+//     next();
+// })
+
+// // POST MIDDLEWARE RUN LAST OF THE MIDDLEARE
+// tourSchema.post('save',function(doc,next) {
+//     console.log("save the file");
+//     next();
+// })
+
+// QUERY MIDDLEWARE 
+// tourSchema.pre('find',function(next) {
+//     this.find({ secretTour: { $ne: true }})
+//     next()
+// })
+
+// AGGREGATE MIDDLEWARE 
+tourSchema.pre('aggregate',function(next) {
+    console.log(this);
+    next()
 })
 
 const Tour = mongoose.model('Tour',tourSchema);
