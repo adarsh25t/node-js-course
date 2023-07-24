@@ -2,6 +2,7 @@ const express = require('express');
 const tourRouter = require('./routes/tourRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
+const userRouter = require('./routes/userRoutes');
 
 let app = express();
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 
 app.use('/api/v1/tours',tourRouter);
+app.use('/api/v1/user',userRouter);
 
 // ROUTER ERROR HANDLER 
 app.all('*', (req,res,next) => {
