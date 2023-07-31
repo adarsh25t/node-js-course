@@ -1,10 +1,11 @@
 const express = require('express');
 const { getAllTours, createTour, getTour, deleteTour, updateTour, getTourStarts, getMonthlyPlan } = require('../controllers/tourController');
+const { protect } = require('../controllers/authController');
 const tourRouter = express.Router();
 
 tourRouter
     .route('/')
-    .get(getAllTours)
+    .get(protect,getAllTours)
     .post(createTour);
 
 tourRouter
