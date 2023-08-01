@@ -88,11 +88,29 @@ exports.protect = async (req,res,next) => {
     const freshUser = await User.findById(decoded.id);
 
     if (!freshUser) {
-        return next("User is not exist!",401)
+        return next( new AppError("User is not exist!",401))
     }
 
     // 4. CHECK IF USER CHANGED PASSWORD AFTER THE TOKEN WAS ISSUED
-    
+    if (freshUser.changedPasswordAfter(decoded.iat)) {
+        return next( new AppError("User recently changed password! please log in again.",401))
+    }
+
+    // GRANT ACCESS TO PROTECTED ROUTE
+    req.user = freshUser;
     next()
+}
+
+
+exports.restrictTo = (...role) => {
+
+    return (req,res,next) => {
+        if (!role.includes(req.user.role)) {
+            return next( new AppError("You do not have permission to perform this action!",403))
+        }
+        next();
+    }
+
+    
 }
 

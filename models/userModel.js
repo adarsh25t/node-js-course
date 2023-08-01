@@ -13,6 +13,11 @@ const userSchema = new mongoose.Schema({
         lowercase: true
     },
     photo: String,
+    role: {
+        type: String,
+        enum: ['user', 'guide', 'lead-guide', 'admin'],
+        default: 'user'
+    },
     password: {
         type: String,
         required: [true,'A user must have a password'],
@@ -28,7 +33,8 @@ const userSchema = new mongoose.Schema({
             },
             message: "password and confirm password must be same!"
         }
-    }
+    },
+    passwordChangedAt: Date
 })
 
 userSchema.pre('save', async function(next) {
@@ -43,5 +49,13 @@ userSchema.methods.correctPassword = async function(password,userPassword) {
     return await bcrypt.compare(password,userPassword)
 }
 
+userSchema.methods.changedPasswordAfter = function(JWTtimestamp) {
+    if (this.passwordChangedAt) {
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTtimestamp < changedTimestamp;
+    }
+}
+
 const User = mongoose.model('User',userSchema);
+
 module.exports = User;
