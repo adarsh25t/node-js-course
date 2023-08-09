@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs')
+const crypto = require('crypto');
+const { log } = require('console');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -34,7 +36,9 @@ const userSchema = new mongoose.Schema({
             message: "password and confirm password must be same!"
         }
     },
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date
 })
 
 userSchema.pre('save', async function(next) {
@@ -54,6 +58,15 @@ userSchema.methods.changedPasswordAfter = function(JWTtimestamp) {
         const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
         return JWTtimestamp < changedTimestamp;
     }
+}
+
+userSchema.methods.createPasswordResetToken = function() {
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    console.log({resetToken});
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+    return resetToken;
 }
 
 const User = mongoose.model('User',userSchema);
