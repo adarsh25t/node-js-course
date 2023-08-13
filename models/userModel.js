@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema({
             message: "password and confirm password must be same!"
         }
     },
+    status:{
+        type: Boolean,
+        default: true,
+        select: false
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date
@@ -46,6 +51,11 @@ userSchema.pre('save', async function(next) {
 
     this.password = await bcrypt.hash(this.password,12);
     this.passwordConfirm = undefined;
+    next()
+})
+
+userSchema.pre(/^find/, function(next){
+    this.find({status: {$ne: false}});
     next()
 })
 
