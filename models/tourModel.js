@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema({
     name:{
@@ -55,6 +56,30 @@ const tourSchema = new mongoose.Schema({
         default: Date.now()
     },
     startDates:[Date],
+    startLocation: {
+        type: {
+            type: String,
+            default: "Point",
+            enum:["Point"]
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
+    },
+    locations: [
+        {
+            type: {
+                type: String,
+                default: "Point",
+                enum:["Point"]
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
+    guides: Array,
     secretTour:{
         type: Boolean,
         default: false
@@ -90,6 +115,13 @@ tourSchema.virtual('durationWeeks').get(function() {
 tourSchema.pre('aggregate',function(next) {
     console.log(this);
     next()
+})
+
+tourSchema.pre('save', async function(next){
+    const PromiseGuides = this.guides.map( async(id) => await User.findById(id))
+    this.guides = await Promise.all(PromiseGuides);
+
+   next()
 })
 
 const Tour = mongoose.model('Tour',tourSchema);
