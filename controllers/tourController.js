@@ -55,7 +55,7 @@ exports.getTour = async (req,res,next) => {
 
     try {
         let id = req.params.id;
-        const tour = await Tour.findById(id);
+        const tour = await Tour.findById(id)
 
         res.status(200).json({
             status: "Success",

@@ -79,7 +79,10 @@ const tourSchema = new mongoose.Schema({
             day: Number
         }
     ],
-    guides: Array,
+    guides: [{
+        type: mongoose.Schema.ObjectId,
+        ref:'User'
+    }],
     secretTour:{
         type: Boolean,
         default: false
@@ -91,6 +94,14 @@ const tourSchema = new mongoose.Schema({
 
 tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7;
+})
+
+tourSchema.pre(/^find/, function(next){
+    this.populate({
+        path:"guides",
+        select:"-__v"
+    })
+    next()
 })
 
 // DOCUMENT MIDDLEWARE: RUNS BEFORE .save() and .create()
@@ -117,12 +128,12 @@ tourSchema.pre('aggregate',function(next) {
     next()
 })
 
-tourSchema.pre('save', async function(next){
-    const PromiseGuides = this.guides.map( async(id) => await User.findById(id))
-    this.guides = await Promise.all(PromiseGuides);
+// tourSchema.pre('save', async function(next){
+//     const PromiseGuides = this.guides.map( async(id) => await User.findById(id))
+//     this.guides = await Promise.all(PromiseGuides);
 
-   next()
-})
+//    next()
+// })
 
 const Tour = mongoose.model('Tour',tourSchema);
 module.exports = Tour;
