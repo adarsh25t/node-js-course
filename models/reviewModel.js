@@ -22,7 +22,7 @@ const reviewSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     }  
-})
+})   
 
 reviewSchema.pre(/^find/, function(next) {
     this.populate(['user','tour']);
