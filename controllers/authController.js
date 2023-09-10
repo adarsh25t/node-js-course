@@ -20,7 +20,7 @@ const createTokenAndSendResponse = (user,statusCode,res) => {
         secure: true
     }
 
-    res.cookie('jwt',token,cookieOptions)
+    //res.cookie('jwt',token,cookieOptions)
     res.status(statusCode).json({
         status: 'success',
         token,
